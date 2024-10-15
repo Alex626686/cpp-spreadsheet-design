@@ -4,6 +4,21 @@
 #include "common.h"
 
 #include <functional>
+#include <map>
+
+class CellHasher {
+public:
+    size_t operator()(const Position p) const {
+        return std::hash<std::string>()(p.ToString());
+    }
+};
+
+class CellComparator {
+public:
+    bool operator()(const Position& lhs, const Position& rhs) const {
+        return lhs == rhs;
+    }
+};
 
 class Sheet : public SheetInterface {
 public:
@@ -20,15 +35,14 @@ public:
 
     void PrintValues(std::ostream& output) const override;
     void PrintTexts(std::ostream& output) const override;
-
+    
     const Cell* GetConcreteCell(Position pos) const;
     Cell* GetConcreteCell(Position pos);
 
+    const Cell* GetConcreteCell(Position pos) const;
+    Cell* GetConcreteCell(Position pos);
 private:
-    void MaybeIncreaseSizeToIncludePosition(Position pos);
-    void PrintCells(std::ostream& output,
-                    const std::function<void(const CellInterface&)>& printCell) const;
-    Size GetActualSize() const;
-
-    std::vector<std::vector<std::unique_ptr<Cell>>> cells_;
+    std::unordered_map<Position, Cell, CellHasher, CellComparator> table_;
+    std::map<int, int> rows_map;
+    std::map<int, int> cols_map;
 };
